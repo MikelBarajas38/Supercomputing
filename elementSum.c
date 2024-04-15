@@ -6,7 +6,7 @@
 
 int *createArray(int N)
 {
-    int *array = (int *)malloc(N*sizeof(int));
+    int *array = malloc(N*sizeof(int));
     return array;
 }
 
@@ -63,25 +63,38 @@ int main(int argc, char** argv)
         int *A = createArray(N);
         fillArray(A, N);
 
+        int *B = createArray(N);
+        fillArray(B, N);
+
+        int *C = createArray(N);
+
+        printf("Array A: ");
         printArray(A, N);
+
+        printf("Array B: ");
+        printArray(B, N);
 
         for(int iProc = 1; iProc < numproc - 1; iProc++)
         {
             MPI_Send(A + ((iProc - 1) * nData), nData, MPI_INT, iProc, 0, MPI_COMM_WORLD);
+            MPI_Send(B + ((iProc - 1) * nData), nData, MPI_INT, iProc, 0, MPI_COMM_WORLD);
         }
         MPI_Send(A + ((numproc - 2) * nData), nDataLast, MPI_INT, numproc - 1, 0, MPI_COMM_WORLD);
+        MPI_Send(B + ((numproc - 2) * nData), nDataLast, MPI_INT, numproc - 1, 0, MPI_COMM_WORLD);
 
-        int sum = 0;
-        for(int iProc = 1; iProc < numproc; iProc++)
+        for(int iProc = 1; iProc < numproc - 1; iProc++) 
         {
-            int sumProc;
-            MPI_Recv(&sumProc, 1, MPI_INT, iProc, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            sum += sumProc;
+            MPI_Recv(C + ((iProc - 1) * nData), nData, MPI_INT, iProc, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
+        MPI_Recv(C + ((numproc - 2) * nData), nDataLast, MPI_INT, numproc - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        printf("Sum = %d\n\n", sum);
+        printf("Result C: ");
+        printArray(C, N);
+        printf("\n");
 
         freeArray(A);
+        freeArray(B);
+        freeArray(C);
 
     }
     else
@@ -93,18 +106,22 @@ int main(int argc, char** argv)
         }
 
         int *A = createArray(nData);
+        int *B = createArray(nData);
+        int *C = createArray(nData);
 
         MPI_Recv(A, nData, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(B, nData, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        int sum = 0;
         for(int i = 0; i < nData; i++)
         {
-            sum += A[i];
+            C[i] = A[i] + B[i];
         }
 
-        MPI_Send(&sum, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(C, nData, MPI_INT, 0, 0, MPI_COMM_WORLD);
 
         freeArray(A);
+        freeArray(B);
+        freeArray(C);
     }
 
     MPI_Finalize();
