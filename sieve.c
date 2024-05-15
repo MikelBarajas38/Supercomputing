@@ -34,7 +34,7 @@ void printArray(int *array, int N)
 {
     for(int i = 0; i < N; i++)
     {
-        printf("%d\n", array[i]);
+        printf("%d ", array[i]);
     }
     printf("\n");
 }
@@ -160,15 +160,15 @@ int main(int argc, char** argv)
 
     if(idproc == 0)
     {
-        //printf("\nSieve: \n");
-        //printArray(primes, N + 1);
+        printf("\nSieve: \n");
+        printArray(primes, N + 1);
 
         printf("Primes: \n");
         for(int i = 0; i <= N; i++)
         {
             if(primes[i])
             {
-                printf("%d\n", i);
+                printf("%d ", i);
             }
         }
         printf("\n\n");
