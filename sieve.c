@@ -168,7 +168,7 @@ int main(int argc, char** argv)
         {
             if(primes[i])
             {
-                printf("%d ", i);
+                printf("%d\n", i);
             }
         }
         printf("\n\n");
